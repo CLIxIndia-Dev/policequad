@@ -1,6 +1,5 @@
 var playedMission =[0,0,0,0];
 var completedMission =[0,0,0,0];
-var language1 = "hi";
 var StorySkiped = false;
 var GlossaryDownloaded = false;
 var helpScreen =[0,0,0,0];
@@ -82,10 +81,9 @@ saveDataOnExit(JsonArray2);
 function stageEnd( mmission,stagePlayed,replayCount,isPassed,caseDetails,scoreIN,stageStar){
 var JsonArray = 
 {
-"app_name": "policesquadv2",
-"event_type": "stage_end",
-"params": 
+"appData": 
 {
+"event_type": "stage_end",
 "CurrentMission": mmission,
 "CurrentLevel": "", //please infer per mission
 "StagePlayed": stagePlayed, // cases attempted
@@ -97,7 +95,14 @@ var JsonArray =
 "NumberOfClues": "",//infer it from case details values
 "scoreAchieved": scoreIN,  //highScore
 "starEarned": stageStar, //starts earned total
-"language" : language1
+"MissionsPlayed": playedMission, // Mission attempted [0,0,0,0]  1 is yes
+"MissionsCompleted": completedMission, //Mission completed - yes/ no
+"SessionTimeSpent": getTimeSpent(), //Mission time spent  total 
+"highScore": highScore,  //highScore
+"starTotal": gameScore, //starts earned total
+"StorySkiped": StorySkiped,  //story skiped
+"GlossaryDownloaded": GlossaryDownloaded,  //Glossary downloaded
+"helpScreenviewed": helpScreen, //help screen per Mission [0,0,0,0] 1 is yes
 }
 
 };  replayCount =0;
@@ -129,20 +134,31 @@ class GameReporter
 
 	submitData(url, data) {
 		var user_id = this.getCookie('user_id')
+		var buddy_details = ""
+		buddy_details = this.getCookie('buddy_ids') 
 		var data_string = {}
-		data_string['user_id'] = this.getCookie('user_id');
+		data_string['userId'] = this.getCookie('user_id');
 		var date = new Date();
 		var csrftoken;
+		var language = "";
+		language = "hi";
+		var sessionid = "";
 		csrftoken = this.getCookie('csrftoken');
+		sessionid = this.getCookie('sessionid')
     	var timestamp = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " +  date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-		data_string['created_at'] = timestamp
+		data_string['createdAt'] = timestamp
+		data_string['buddyIds'] = buddy_details
+		data_string['sessionid'] = sessionid
+		data_string['appName'] = "policesquad"
+		data_string['language'] = language
 		for (var key in data) {data_string[key] = data[key];};
 		data_string = JSON.stringify(data_string);
+		
 		$.ajax({
                   type: "POST",
                   data:{
-                        "user_data":data_string,
-                        "app_name":"policesquad",
+                        "payload":data_string,
+                        "appName":"policesquad",
                         'csrfmiddlewaretoken':csrftoken,
                     },
                   url: "/tools/logging",
